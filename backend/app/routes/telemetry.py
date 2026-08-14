@@ -23,7 +23,11 @@ class TelemetryCreate(BaseModel):
 
 @router.get("/")
 def get_telemetry(db: Session = Depends(get_db)):
-    telemetry = db.query(TelemetryRecord).all()
+    telemetry = (
+        db.query(TelemetryRecord)
+        .order_by(TelemetryRecord.recorded_at.desc())
+        .all()
+    )
     return telemetry
 
 
