@@ -1,4 +1,4 @@
-import type { Mission, TelemetryRecord, Anomaly, AIReport } from "./types";
+import type { Mission, TelemetryRecord, Anomaly, AIReport, AIAnalysis, } from "./types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -22,4 +22,35 @@ export function getAnomalies(): Promise<Anomaly[]> {
 
 export function getReports(): Promise<AIReport[]> {
   return fetchJson<AIReport[]>("/reports/");
+}
+
+export interface AIAnalysisRequest {
+  mission: string;
+  spacecraft_id: string;
+  battery: number;
+  fuel: number;
+  temperature: number;
+  signal_strength: number;
+  vibration: number;
+}
+
+export async function analyzeTelemetry(
+  data: AIAnalysisRequest,
+): Promise<AIAnalysis> {
+  const res = await fetch(`${API_BASE}/ai/analyze`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    throw new Error(`AI analysis error ${res.status}`);
+  }
+
+  const result = await res.json();
+
+  return result.ai_report as AIAnalysis;
 }

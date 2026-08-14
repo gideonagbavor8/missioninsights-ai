@@ -34,3 +34,10 @@ export interface AIReport {
   recommendation: string;
   created_at: string;
 }
+
+export interface AIAnalysis {
+  health_summary: string;
+  anomalies: string[];
+  risk_level: string;
+  recommendations: string[];
+}

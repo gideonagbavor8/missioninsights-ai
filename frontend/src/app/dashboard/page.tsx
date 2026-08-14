@@ -5,6 +5,7 @@ import TelemetryGauge from "@/components/TelemetryGauge";
 import AnomalyAlert from "@/components/AnomalyAlert";
 import AiReportCard from "@/components/AiReportCard";
 import SectionHeader from "@/components/SectionHeader";
+import AIAnalysisPanel from "@/components/AIAnalysisPanel";
 
 export const metadata = {
   title: "Dashboard — MissionInsights AI",
@@ -176,6 +177,23 @@ export default async function DashboardPage() {
             </div>
           )}
         </section>
+	{/* AI Mission Analysis */}
+{missionData.length > 0 && telemetryData.length > 0 && (
+  <AIAnalysisPanel
+    mission={missionData[0].mission_name}
+    spacecraftId={missionData[0].spacecraft_name}
+    battery={telemetryData[0].battery_level}
+    fuel={telemetryData[0].fuel_level}
+    temperature={telemetryData[0].temperature}
+    signalStrength={telemetryData[0].signal_strength}
+    vibration={telemetryData[0].thruster_vibration}
+  />
+)}
+
+
+
+
+
 
         {/* ── AI Reports ── */}
         <section aria-labelledby="reports-heading" className="space-y-4">
