@@ -4,6 +4,7 @@ from pydantic import BaseModel
 
 from app.database import get_db
 from app.models.telemetry import TelemetryRecord
+from app.services.anomaly_detector import detect_telemetry_anomalies
 
 
 router = APIRouter(
@@ -49,4 +50,8 @@ def create_telemetry(
     db.commit()
     db.refresh(new_telemetry)
 
+    detect_telemetry_anomalies(
+    	db=db,
+    	mission_id=telemetry.mission_id
+    )
     return new_telemetry
