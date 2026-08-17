@@ -6,6 +6,7 @@ import AnomalyAlert from "@/components/AnomalyAlert";
 import AiReportCard from "@/components/AiReportCard";
 import SectionHeader from "@/components/SectionHeader";
 import AIAnalysisPanel from "@/components/AIAnalysisPanel";
+import TelemetryChart from "@/components/TelemetryChart";
 
 export const metadata = {
   title: "Dashboard — MissionInsights AI",
@@ -150,6 +151,19 @@ export default async function DashboardPage() {
                 colorClass={vibration > 7 ? "bg-red-500" : vibration > 4 ? "bg-orange-400" : "bg-teal-500"}
                 alert={vibration > 7}
               />
+            </div>
+          )}
+        </section>
+
+                {/* ── Telemetry History ── */}
+        <section aria-labelledby="telemetry-history-heading" className="space-y-4">
+          <SectionHeader title="Telemetry History" />
+
+          {telemetryData.length < 2 ? (
+            <EmptyState message="Not enough telemetry data for a history chart." />
+          ) : (
+            <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+              <TelemetryChart data={telemetryData} />
             </div>
           )}
         </section>

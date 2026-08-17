@@ -1,7 +1,45 @@
+from datetime import datetime, timezone
+
 from sqlalchemy.orm import Session
 
 from app.models.telemetry import TelemetryRecord
 from app.models.anomaly import Anomaly
+
+
+def save_anomaly(
+    db: Session,
+    mission_id: int,
+    issue: str,
+    severity: str,
+    confidence: float,
+    action: str,
+):
+    existing = (
+        db.query(Anomaly)
+        .filter(
+            Anomaly.mission_id == mission_id,
+            Anomaly.issue == issue,
+        )
+        .first()
+    )
+
+    if existing:
+        existing.severity = severity
+        existing.confidence = confidence
+        existing.recommended_action = action
+        existing.detected_at = datetime.now(timezone.utc)
+        return existing
+
+    anomaly = Anomaly(
+        mission_id=mission_id,
+        issue=issue,
+        severity=severity,
+        confidence=confidence,
+        recommended_action=action,
+    )
+
+    db.add(anomaly)
+    return anomaly
 
 
 def detect_telemetry_anomalies(
@@ -23,6 +61,15 @@ def detect_telemetry_anomalies(
     latest = telemetry[-1]
     previous = telemetry[-2]
 
+    latest_vibration = float(latest.thruster_vibration)
+    previous_vibration = float(previous.thruster_vibration)
+    
+    latest_battery = float(latest.battery_level)
+    previous_battery = float(previous.battery_level)
+    
+    latest_temperature = float(latest.temperature)
+    previous_temperature = float(previous.temperature)
+
     # Detect increasing thruster vibration
     if latest.thruster_vibration > previous.thruster_vibration:
         increase = latest.thruster_vibration - previous.thruster_vibration
@@ -40,15 +87,15 @@ def detect_telemetry_anomalies(
             confidence = 70.0
             action = "Continue monitoring thruster vibration."
 
-        anomaly = Anomaly(
-            mission_id=mission_id,
-            issue="Thruster vibration increasing",
-            severity=severity,
-            confidence=confidence,
-            recommended_action=action,
+        anomaly = save_anomaly(
+            db,
+            mission_id,
+            "Thruster vibration increasing",
+            severity,
+            confidence,
+            action,
         )
 
-        db.add(anomaly)
         anomalies.append(anomaly)
 
     # Detect declining battery
@@ -68,15 +115,15 @@ def detect_telemetry_anomalies(
             confidence = 65.0
             action = "Continue monitoring battery levels."
 
-        anomaly = Anomaly(
-            mission_id=mission_id,
-            issue="Battery level decreasing",
-            severity=severity,
-            confidence=confidence,
-            recommended_action=action,
+        anomaly = save_anomaly(
+            db,
+            mission_id,
+            "Battery level decreasing",
+            severity,
+            confidence,
+            action,
         )
 
-        db.add(anomaly)
         anomalies.append(anomaly)
 
     # Detect increasing temperature
@@ -96,15 +143,15 @@ def detect_telemetry_anomalies(
             confidence = 65.0
             action = "Continue monitoring temperature."
 
-        anomaly = Anomaly(
-            mission_id=mission_id,
-            issue="Spacecraft temperature increasing",
-            severity=severity,
-            confidence=confidence,
-            recommended_action=action,
+        anomaly = save_anomaly(
+            db,
+            mission_id,
+            "Spacecraft temperature increasing",
+            severity,
+            confidence,
+            action,
         )
 
-        db.add(anomaly)
         anomalies.append(anomaly)
 
     db.commit()

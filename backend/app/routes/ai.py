@@ -1,6 +1,9 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
 from pydantic import BaseModel
 
+from app.database import get_db
+from app.models.anomaly import Anomaly
 from app.services.watsonx_service import generate_mission_report
 
 
@@ -21,8 +24,10 @@ class TelemetryRequest(BaseModel):
 
 
 @router.post("/analyze")
-def analyze_telemetry(data: TelemetryRequest):
-
+def analyze_telemetry(
+    data: TelemetryRequest,
+    db: Session = Depends(get_db)
+):
     telemetry_text = f"""
 Mission: {data.mission}
 Spacecraft ID: {data.spacecraft_id}
@@ -34,7 +39,29 @@ Signal Strength: {data.signal_strength}%
 Thruster Vibration: {data.vibration}g
 """
 
-    report = generate_mission_report(telemetry_text)
+    anomalies = (
+        db.query(Anomaly)
+        .filter(Anomaly.mission_id == 1)
+        .order_by(Anomaly.detected_at.desc())
+        .all()
+    )
+
+    anomaly_text = "\n".join(
+        [
+            f"- {anomaly.issue} | Severity: {anomaly.severity} | "
+            f"Confidence: {anomaly.confidence}% | "
+            f"Action: {anomaly.recommended_action}"
+            for anomaly in anomalies
+        ]
+    )
+
+    if not anomaly_text:
+        anomaly_text = "No detected anomalies."
+
+    report = generate_mission_report(
+        telemetry_data=telemetry_text,
+        anomaly_data=anomaly_text,
+    )
 
     return {
         "mission": data.mission,
