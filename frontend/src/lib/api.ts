@@ -54,3 +54,19 @@ export async function analyzeTelemetry(
 
   return result.ai_report as AIAnalysis;
 }
+
+
+export function getMissionHealth(missionId: number) {
+  return fetchJson<{
+    score: number;
+    status: string;
+    factors: {
+      battery: number;
+      fuel: number;
+      signal: number;
+      temperature: number;
+      vibration: number;
+    };
+    anomaly_penalty: number;
+  }>(`/health/${missionId}`);
+}

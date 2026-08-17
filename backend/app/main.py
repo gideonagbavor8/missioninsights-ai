@@ -5,6 +5,7 @@ from app.routes import telemetry
 from app.routes import anomalies
 from app.routes import reports
 from app.routes import ai
+from app.routes import health
 
 app = FastAPI(
     title="MissionInsights AI API",
@@ -17,6 +18,8 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",
         "http://127.0.0.1:3000",
+        "http://localhost:3001",
+        "http://127.0.0.1:3001",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -28,6 +31,7 @@ app.include_router(telemetry.router)
 app.include_router(router=anomalies.router)
 app.include_router(router=reports.router)
 app.include_router(router=ai.router)
+app.include_router(health.router)
 
 
 @app.get("/")

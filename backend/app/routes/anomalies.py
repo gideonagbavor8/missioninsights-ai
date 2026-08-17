@@ -44,3 +44,22 @@ def create_anomaly(
     db.refresh(new_anomaly)
 
     return new_anomaly
+
+@router.delete("/{anomaly_id}")
+def delete_anomaly(
+    anomaly_id: int,
+    db: Session = Depends(get_db)
+):
+    anomaly = (
+        db.query(Anomaly)
+        .filter(Anomaly.id == anomaly_id)
+        .first()
+    )
+
+    if not anomaly:
+        return {"message": "Anomaly not found"}
+
+    db.delete(anomaly)
+    db.commit()
+
+    return {"message": "Anomaly deleted successfully"}

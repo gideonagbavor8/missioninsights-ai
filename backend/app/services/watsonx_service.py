@@ -21,13 +21,18 @@ model = ModelInference(
 )
 
 
-def generate_mission_report(telemetry_data: str):
+def generate_mission_report(
+    telemetry_data: str,
+    anomaly_data: str,
+):
     messages = [
         {
             "role": "system",
             "content": (
                 "You are an AI space mission intelligence assistant. "
-                "Analyze spacecraft telemetry data and identify mission risks. "
+                "Analyze spacecraft telemetry together with detected anomalies "
+                "and determine the actual mission risk. "
+                "Pay particular attention to worsening trends and high-severity anomalies. "
                 "Always return valid JSON only. "
                 "Do not use markdown, code fences, or additional explanations."
             ),
@@ -35,7 +40,7 @@ def generate_mission_report(telemetry_data: str):
         {
             "role": "user",
             "content": f"""
-Analyze the following spacecraft telemetry data.
+Analyze the following spacecraft telemetry and detected anomaly data.
 
 Return ONLY valid JSON using exactly this structure:
 
@@ -53,15 +58,21 @@ Return ONLY valid JSON using exactly this structure:
 }}
 
 Rules:
-- "health_summary" must be a concise description of the spacecraft's condition.
-- "anomalies" must be a JSON array of detected anomalies.
-- If there are no anomalies, return an empty array.
+- "health_summary" must reflect both telemetry values and detected anomalies.
+- "anomalies" must contain the important detected anomalies.
 - "risk_level" must be exactly one of: "Low", "Medium", or "High".
-- "recommendations" must be a JSON array of recommended actions.
+- If a High severity anomaly is present, risk_level should normally be "High".
+- If multiple Medium anomalies or significant worsening trends are present, risk_level should normally be "Medium".
+- Use "Low" only when the telemetry and anomalies indicate normal or low-risk operation.
+- "recommendations" must contain practical actions based on the detected risks.
+- Do not ignore detected anomalies simply because individual telemetry values appear acceptable.
 - Return JSON only.
 
 Telemetry:
 {telemetry_data}
+
+Detected Anomalies:
+{anomaly_data}
 """,
         },
     ]
