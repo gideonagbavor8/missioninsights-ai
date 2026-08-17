@@ -1,4 +1,4 @@
-import { getMissions, getTelemetry, getAnomalies, getReports } from "@/lib/api";
+import { getMissions, getTelemetry, getAnomalies, getReports, getMissionHealth, } from "@/lib/api";
 import type { TelemetryRecord } from "@/lib/types";
 import MissionStatusCard from "@/components/MissionStatusCard";
 import TelemetryGauge from "@/components/TelemetryGauge";
@@ -6,7 +6,8 @@ import AnomalyAlert from "@/components/AnomalyAlert";
 import AiReportCard from "@/components/AiReportCard";
 import SectionHeader from "@/components/SectionHeader";
 import AIAnalysisPanel from "@/components/AIAnalysisPanel";
-import TelemetryChart from "@/components/TelemetryChart";
+import TelemetryChart from "@/components/TelemetryChart";import MissionHealthScore from "@/components/MissionHealthScore";
+
 
 export const metadata = {
   title: "Dashboard — MissionInsights AI",
@@ -37,17 +38,19 @@ function vibrationToPercent(g: number): number {
 
 export default async function DashboardPage() {
   // Parallel data fetching — each call is independent
-  const [missions, telemetry, anomalies, reports] = await Promise.allSettled([
-    getMissions(),
-    getTelemetry(),
-    getAnomalies(),
-    getReports(),
-  ]);
+  const [missions, telemetry, anomalies, reports, health] = await Promise.allSettled([
+  getMissions(),
+  getTelemetry(),
+  getAnomalies(),
+  getReports(),
+  getMissionHealth(1),
+]);
 
   const missionData   = missions.status   === "fulfilled" ? missions.value   : [];
   const telemetryData = telemetry.status  === "fulfilled" ? telemetry.value  : [];
   const anomalyData   = anomalies.status  === "fulfilled" ? anomalies.value  : [];
   const reportData    = reports.status    === "fulfilled" ? reports.value    : [];
+  const healthData = health.status === "fulfilled" ? health.value : null;
 
   // Sort anomalies: critical first, then descending confidence
   const sortedAnomalies = [...anomalyData].sort((a, b) => {
@@ -86,6 +89,15 @@ export default async function DashboardPage() {
             Space mission intelligence dashboard
           </p>
         </div>
+
+        {healthData && (
+          <MissionHealthScore
+            score={healthData.score}
+            status={healthData.status}
+            factors={healthData.factors}
+            anomalyPenalty={healthData.anomaly_penalty}
+          />
+        )}
 
         {/* ── Mission Status ── */}
         <section aria-labelledby="missions-heading" className="space-y-4">
