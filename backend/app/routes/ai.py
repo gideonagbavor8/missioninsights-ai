@@ -6,6 +6,7 @@ from app.database import get_db
 from app.models.mission import Mission
 from app.models.telemetry import TelemetryRecord
 from app.models.anomaly import Anomaly
+from app.models.report import AIReport
 from app.services.watsonx_service import generate_mission_report
 
 
@@ -72,6 +73,25 @@ Thruster Vibration: {telemetry.thruster_vibration}g
         telemetry_data=telemetry_text,
         anomaly_data=anomaly_text,
     )
+
+    # Persist the AI analysis so the dashboard reports section is populated.
+    # recommendations is a list — join to a single readable string.
+    recommendations = report.get("recommendations", [])
+    recommendation_text = (
+        " ".join(f"{i + 1}. {r}" for i, r in enumerate(recommendations))
+        if recommendations
+        else "No recommendations."
+    )
+
+    saved_report = AIReport(
+        mission_id=data.mission_id,
+        summary=report.get("health_summary", ""),
+        risk_level=report.get("risk_level", "Unknown"),
+        recommendation=recommendation_text,
+    )
+    db.add(saved_report)
+    db.commit()
+    db.refresh(saved_report)
 
     return {
         "mission": mission.mission_name,
