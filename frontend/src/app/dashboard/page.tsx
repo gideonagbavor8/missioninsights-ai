@@ -38,19 +38,20 @@ function vibrationToPercent(g: number): number {
 
 export default async function DashboardPage() {
   // Parallel data fetching — each call is independent
-  const [missions, telemetry, anomalies, reports, health] = await Promise.allSettled([
-  getMissions(),
-  getTelemetry(),
-  getAnomalies(),
-  getReports(),
-  getMissionHealth(1),
-]);
+  const [missions, telemetry, anomalies, reports] = await Promise.allSettled([
+    getMissions(),
+    getTelemetry(),
+    getAnomalies(),
+    getReports(),
+  ]);
 
-  const missionData   = missions.status   === "fulfilled" ? missions.value   : [];
-  const telemetryData = telemetry.status  === "fulfilled" ? telemetry.value  : [];
-  const anomalyData   = anomalies.status  === "fulfilled" ? anomalies.value  : [];
-  const reportData    = reports.status    === "fulfilled" ? reports.value    : [];
-  const healthData = health.status === "fulfilled" ? health.value : null;
+  const missionData   = missions.status  === "fulfilled" ? missions.value  : [];
+  const telemetryData = telemetry.status === "fulfilled" ? telemetry.value : [];
+  const anomalyData   = anomalies.status === "fulfilled" ? anomalies.value : [];
+  const reportData    = reports.status   === "fulfilled" ? reports.value   : [];
+
+  // Use the first mission's actual DB id (not a hardcoded literal)
+  const primaryMissionId = missionData[0]?.id ?? null;
 
   // Sort anomalies: critical first, then descending confidence
   const sortedAnomalies = [...anomalyData].sort((a, b) => {
@@ -90,14 +91,7 @@ export default async function DashboardPage() {
           </p>
         </div>
 
-        {healthData && (
-          <MissionHealthScore
-            score={healthData.score}
-            status={healthData.status}
-            factors={healthData.factors}
-            anomalyPenalty={healthData.anomaly_penalty}
-          />
-        )}
+        <MissionHealthWidget missionId={primaryMissionId} />
 
         {/* ── Mission Status ── */}
         <section aria-labelledby="missions-heading" className="space-y-4">
@@ -203,21 +197,11 @@ export default async function DashboardPage() {
             </div>
           )}
         </section>
-	{/* AI Mission Analysis */}
-{missionData.length > 0 && telemetryData.length > 0 && (
-  <AIAnalysisPanel
-    mission={missionData[0].mission_name}
-    spacecraftId={missionData[0].spacecraft_name}
-    battery={telemetryData[0].battery_level}
-    fuel={telemetryData[0].fuel_level}
-    temperature={telemetryData[0].temperature}
-    signalStrength={telemetryData[0].signal_strength}
-    vibration={telemetryData[0].thruster_vibration}
-  />
-)}
 
-
-
+        {/* ── AI Mission Analysis ── */}
+        {primaryMissionId !== null && (
+          <AIAnalysisPanel missionId={primaryMissionId} />
+        )}
 
 
 
@@ -244,6 +228,26 @@ export default async function DashboardPage() {
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
+
+async function MissionHealthWidget({ missionId }: { missionId: number | null }) {
+  if (missionId === null) return null;
+
+  let healthData: Awaited<ReturnType<typeof getMissionHealth>> | null = null;
+  try {
+    healthData = await getMissionHealth(missionId);
+  } catch {
+    return null;
+  }
+
+  return (
+    <MissionHealthScore
+      score={healthData.score}
+      status={healthData.status}
+      factors={healthData.factors}
+      anomalyPenalty={healthData.anomaly_penalty}
+    />
+  );
+}
 
 function EmptyState({
   message,

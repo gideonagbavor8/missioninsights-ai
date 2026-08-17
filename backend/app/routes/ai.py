@@ -1,8 +1,10 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 
 from app.database import get_db
+from app.models.mission import Mission
+from app.models.telemetry import TelemetryRecord
 from app.models.anomaly import Anomaly
 from app.services.watsonx_service import generate_mission_report
 
@@ -13,46 +15,54 @@ router = APIRouter(
 )
 
 
-class TelemetryRequest(BaseModel):
-    mission: str
-    spacecraft_id: str
-    battery: int
-    fuel: int
-    temperature: float
-    signal_strength: int
-    vibration: float
+class AnalyzeRequest(BaseModel):
+    mission_id: int
 
 
 @router.post("/analyze")
-def analyze_telemetry(
-    data: TelemetryRequest,
+def analyze_mission(
+    data: AnalyzeRequest,
     db: Session = Depends(get_db)
 ):
-    telemetry_text = f"""
-Mission: {data.mission}
-Spacecraft ID: {data.spacecraft_id}
+    mission = db.query(Mission).filter(Mission.id == data.mission_id).first()
+    if not mission:
+        raise HTTPException(status_code=404, detail="Mission not found")
 
-Battery: {data.battery}%
-Fuel: {data.fuel}%
-Temperature: {data.temperature}°C
-Signal Strength: {data.signal_strength}%
-Thruster Vibration: {data.vibration}g
-"""
+    telemetry = (
+        db.query(TelemetryRecord)
+        .filter(TelemetryRecord.mission_id == data.mission_id)
+        .order_by(TelemetryRecord.recorded_at.desc())
+        .first()
+    )
+    if not telemetry:
+        raise HTTPException(
+            status_code=404,
+            detail="No telemetry found for this mission",
+        )
 
     anomalies = (
         db.query(Anomaly)
-        .filter(Anomaly.mission_id == 1)
+        .filter(Anomaly.mission_id == data.mission_id)
         .order_by(Anomaly.detected_at.desc())
         .all()
     )
 
+    telemetry_text = f"""
+Mission: {mission.mission_name}
+Spacecraft ID: {mission.spacecraft_name}
+
+Battery: {telemetry.battery_level}%
+Fuel: {telemetry.fuel_level}%
+Temperature: {telemetry.temperature}°C
+Signal Strength: {telemetry.signal_strength}%
+Thruster Vibration: {telemetry.thruster_vibration}g
+"""
+
     anomaly_text = "\n".join(
-        [
-            f"- {anomaly.issue} | Severity: {anomaly.severity} | "
-            f"Confidence: {anomaly.confidence}% | "
-            f"Action: {anomaly.recommended_action}"
-            for anomaly in anomalies
-        ]
+        f"- {a.issue} | Severity: {a.severity} | "
+        f"Confidence: {a.confidence}% | "
+        f"Action: {a.recommended_action}"
+        for a in anomalies
     )
 
     if not anomaly_text:
@@ -64,7 +74,7 @@ Thruster Vibration: {data.vibration}g
     )
 
     return {
-        "mission": data.mission,
-        "spacecraft_id": data.spacecraft_id,
-        "ai_report": report
+        "mission": mission.mission_name,
+        "spacecraft_id": mission.spacecraft_name,
+        "ai_report": report,
     }

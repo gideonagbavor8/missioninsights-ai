@@ -25,13 +25,7 @@ export function getReports(): Promise<AIReport[]> {
 }
 
 export interface AIAnalysisRequest {
-  mission: string;
-  spacecraft_id: string;
-  battery: number;
-  fuel: number;
-  temperature: number;
-  signal_strength: number;
-  vibration: number;
+  mission_id: number;
 }
 
 export async function analyzeTelemetry(
@@ -39,9 +33,7 @@ export async function analyzeTelemetry(
 ): Promise<AIAnalysis> {
   const res = await fetch(`${API_BASE}/ai/analyze`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
     cache: "no-store",
   });
@@ -51,7 +43,6 @@ export async function analyzeTelemetry(
   }
 
   const result = await res.json();
-
   return result.ai_report as AIAnalysis;
 }
 
