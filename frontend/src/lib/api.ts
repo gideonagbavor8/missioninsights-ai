@@ -1,4 +1,4 @@
-import type { Mission, TelemetryRecord, Anomaly, AIReport, AIAnalysis, } from "./types";
+import type { Mission, TelemetryRecord, Anomaly, AIReport, AIAnalysis, MissionAnswer } from "./types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -25,13 +25,7 @@ export function getReports(): Promise<AIReport[]> {
 }
 
 export interface AIAnalysisRequest {
-  mission: string;
-  spacecraft_id: string;
-  battery: number;
-  fuel: number;
-  temperature: number;
-  signal_strength: number;
-  vibration: number;
+  mission_id: number;
 }
 
 export async function analyzeTelemetry(
@@ -39,9 +33,7 @@ export async function analyzeTelemetry(
 ): Promise<AIAnalysis> {
   const res = await fetch(`${API_BASE}/ai/analyze`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
     cache: "no-store",
   });
@@ -51,10 +43,27 @@ export async function analyzeTelemetry(
   }
 
   const result = await res.json();
-
   return result.ai_report as AIAnalysis;
 }
 
+
+export async function askMission(data: {
+  mission_id: number;
+  question: string;
+}): Promise<MissionAnswer> {
+  const res = await fetch(`${API_BASE}/ai/ask`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    throw new Error(`Mission Commander error ${res.status}`);
+  }
+
+  return res.json() as Promise<MissionAnswer>;
+}
 
 export function getMissionHealth(missionId: number) {
   return fetchJson<{

@@ -5,24 +5,10 @@ import { analyzeTelemetry } from "@/lib/api";
 import type { AIAnalysis } from "@/lib/types";
 
 interface Props {
-  mission: string;
-  spacecraftId: string;
-  battery: number;
-  fuel: number;
-  temperature: number;
-  signalStrength: number;
-  vibration: number;
+  missionId: number;
 }
 
-export default function AIAnalysisPanel({
-  mission,
-  spacecraftId,
-  battery,
-  fuel,
-  temperature,
-  signalStrength,
-  vibration,
-}: Props) {
+export default function AIAnalysisPanel({ missionId }: Props) {
   const [analysis, setAnalysis] = useState<AIAnalysis | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,15 +18,7 @@ export default function AIAnalysisPanel({
     setError(null);
 
     try {
-      const result = await analyzeTelemetry({
-        mission,
-        spacecraft_id: spacecraftId,
-        battery,
-        fuel,
-        temperature,
-        signal_strength: signalStrength,
-        vibration,
-      });
+      const result = await analyzeTelemetry({ mission_id: missionId });
 
       setAnalysis(result);
     } catch (err) {

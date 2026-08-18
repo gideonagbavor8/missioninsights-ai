@@ -41,3 +41,7 @@ export interface AIAnalysis {
   risk_level: string;
   recommendations: string[];
 }
+
+export interface MissionAnswer {
+  answer: string;
+}
