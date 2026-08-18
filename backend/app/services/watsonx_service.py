@@ -90,3 +90,37 @@ Detected Anomalies:
             "risk_level": "Unknown",
             "recommendations": [],
         }
+
+
+def answer_mission_question(
+    telemetry_data: str,
+    anomaly_data: str,
+    question: str,
+) -> str:
+    messages = [
+        {
+            "role": "system",
+            "content": (
+                "You are Mission Commander, an AI assistant for spacecraft operations. "
+                "You answer questions from mission operators using only the telemetry "
+                "readings and detected anomalies provided. "
+                "Never invent telemetry values, anomaly events, or system states that "
+                "are not present in the supplied context. "
+                "When proposing a cause, clearly label it as a possibility, not a fact. "
+                "Keep answers concise, practical, and operator-focused. "
+                "Respond in plain text — no markdown, no bullet symbols, no code blocks."
+            ),
+        },
+        {
+            "role": "user",
+            "content": (
+                f"Current mission context:\n\n"
+                f"Telemetry:\n{telemetry_data}\n\n"
+                f"Detected anomalies:\n{anomaly_data}\n\n"
+                f"Operator question: {question}"
+            ),
+        },
+    ]
+
+    response = model.chat(messages=messages)
+    return response["choices"][0]["message"]["content"].strip()

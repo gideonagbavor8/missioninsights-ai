@@ -6,7 +6,9 @@ import AnomalyAlert from "@/components/AnomalyAlert";
 import AiReportCard from "@/components/AiReportCard";
 import SectionHeader from "@/components/SectionHeader";
 import AIAnalysisPanel from "@/components/AIAnalysisPanel";
-import TelemetryChart from "@/components/TelemetryChart";import MissionHealthScore from "@/components/MissionHealthScore";
+import MissionCommanderPanel from "@/components/MissionCommanderPanel";
+import TelemetryChart from "@/components/TelemetryChart";
+import MissionHealthScore from "@/components/MissionHealthScore";
 
 
 export const metadata = {
@@ -201,6 +203,11 @@ export default async function DashboardPage() {
         {/* ── AI Mission Analysis ── */}
         {primaryMissionId !== null && (
           <AIAnalysisPanel missionId={primaryMissionId} />
+        )}
+
+        {/* ── Mission Commander ── */}
+        {primaryMissionId !== null && (
+          <MissionCommanderPanel missionId={primaryMissionId} />
         )}
 
 

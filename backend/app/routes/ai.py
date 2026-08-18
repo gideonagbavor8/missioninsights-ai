@@ -7,7 +7,7 @@ from app.models.mission import Mission
 from app.models.telemetry import TelemetryRecord
 from app.models.anomaly import Anomaly
 from app.models.report import AIReport
-from app.services.watsonx_service import generate_mission_report
+from app.services.watsonx_service import generate_mission_report, answer_mission_question
 
 
 router = APIRouter(
@@ -98,3 +98,65 @@ Thruster Vibration: {telemetry.thruster_vibration}g
         "spacecraft_id": mission.spacecraft_name,
         "ai_report": report,
     }
+
+
+class AskRequest(BaseModel):
+    mission_id: int
+    question: str
+
+
+@router.post("/ask")
+def ask_mission(
+    data: AskRequest,
+    db: Session = Depends(get_db),
+):
+    if not data.question.strip():
+        raise HTTPException(status_code=422, detail="Question must not be empty")
+
+    mission = db.query(Mission).filter(Mission.id == data.mission_id).first()
+    if not mission:
+        raise HTTPException(status_code=404, detail="Mission not found")
+
+    telemetry = (
+        db.query(TelemetryRecord)
+        .filter(TelemetryRecord.mission_id == data.mission_id)
+        .order_by(TelemetryRecord.recorded_at.desc())
+        .first()
+    )
+    if not telemetry:
+        raise HTTPException(
+            status_code=404,
+            detail="No telemetry found for this mission",
+        )
+
+    anomalies = (
+        db.query(Anomaly)
+        .filter(Anomaly.mission_id == data.mission_id)
+        .order_by(Anomaly.detected_at.desc())
+        .all()
+    )
+
+    telemetry_text = (
+        f"Mission: {mission.mission_name}\n"
+        f"Spacecraft: {mission.spacecraft_name}\n"
+        f"Battery: {telemetry.battery_level}%\n"
+        f"Fuel: {telemetry.fuel_level}%\n"
+        f"Temperature: {telemetry.temperature}°C\n"
+        f"Signal Strength: {telemetry.signal_strength}%\n"
+        f"Thruster Vibration: {telemetry.thruster_vibration}g"
+    )
+
+    anomaly_text = "\n".join(
+        f"- {a.issue} | Severity: {a.severity} | "
+        f"Confidence: {a.confidence}% | "
+        f"Action: {a.recommended_action}"
+        for a in anomalies
+    ) or "No detected anomalies."
+
+    answer = answer_mission_question(
+        telemetry_data=telemetry_text,
+        anomaly_data=anomaly_text,
+        question=data.question.strip(),
+    )
+
+    return {"answer": answer}
