@@ -123,6 +123,31 @@ Mission Insights & Recommendations
 
 - PostgreSQL
 
+## IBM Bob Development
+
+IBM Bob IDE was used as the primary development environment for building MissionInsights AI.
+
+Bob was used throughout the development process to:
+
+- Implement and refine the Next.js frontend
+- Build and improve dashboard components
+- Develop telemetry visualization and mission health interfaces
+- Implement and refine AI-powered mission analysis features
+- Integrate the frontend with the FastAPI backend
+- Review and improve application code
+- Test builds and resolve implementation issues
+- Refine the dashboard into a professional mission-control interface
+
+The development workflow used IBM Bob to accelerate implementation while maintaining a structured GitHub-based development process with feature branches, commits, and incremental testing.
+
+### IBM AI Technologies
+
+MissionInsights AI uses IBM technologies as part of its AI workflow:
+
+- **IBM Bob IDE:** Primary development tool
+- **IBM watsonx.ai:** AI platform used for model integration
+- **IBM Granite:** `ibm/granite-4-h-small` via IBM watsonx.ai, used for mission analysis, explanations, recommendations, and Mission Commander responses
+
 ### Artificial Intelligence
 
 - IBM Granite
