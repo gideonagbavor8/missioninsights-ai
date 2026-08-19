@@ -17,7 +17,7 @@ The final product should demonstrate:
 
 ## 1. Telemetry Dashboard
 
-Status: ☐ Not Started
+Status: ☑ Complete
 
 ### Requirements
 
@@ -37,16 +37,16 @@ Metrics:
 
 Definition of Done:
 
-☐ Dashboard loads successfully  
-☐ Telemetry data is displayed  
-☐ Charts visualize trends  
-☐ Alerts are visible  
+☑ Dashboard loads successfully  
+☑ Telemetry data is displayed  
+☑ Charts visualize trends  
+☑ Alerts are visible  
 
 ---
 
 # 2. AI Anomaly Detection
 
-Status: ☐ Not Started
+Status: ☑ Complete
 
 ### Requirements
 
@@ -69,15 +69,15 @@ Output:
 
 Definition of Done:
 
-☐ Telemetry data can be analyzed  
-☐ Anomalies are detected  
-☐ Results are displayed to users  
+☑ Telemetry data can be analyzed  
+☑ Anomalies are detected  
+☑ Results are displayed to users  
 
 ---
 
 # 3. Mission Commander AI
 
-Status: ☐ Not Started
+Status: ☑ Complete
 
 ### Requirements
 
@@ -98,15 +98,15 @@ Output:
 
 Definition of Done:
 
-☐ User can submit questions  
-☐ AI generates responses  
-☐ Responses use mission data  
+☑ User can submit questions  
+☑ AI generates responses  
+☑ Responses use mission data  
 
 ---
 
 # 4. AI Mission Reports
 
-Status: ☐ Not Started
+Status: ☑ Complete
 
 ### Requirements
 
@@ -121,9 +121,41 @@ Reports should include:
 
 Definition of Done:
 
-☐ Reports are generated  
-☐ Reports are stored  
-☐ Reports can be viewed  
+☑ Reports are generated  
+☑ Reports are stored  
+☑ Reports can be viewed  
+
+---
+
+# 5. Mission Health Score
+
+Status: ☑ Complete
+
+### Requirements
+
+Calculate a composite health score from the latest telemetry and active anomalies.
+
+Score factors:
+
+- Battery level (25%)
+- Fuel level (25%)
+- Signal strength (20%)
+- Temperature (15%)
+- Thruster vibration (15%)
+- Anomaly severity penalty
+
+Output:
+
+- Numeric score (0–100)
+- Status label: Healthy, Warning, or Critical
+- Per-factor breakdown
+- Anomaly penalty applied
+
+Definition of Done:
+
+☑ Health score is calculated from latest telemetry  
+☑ Anomaly penalty is applied  
+☑ Score and status are displayed on the dashboard  
 
 ---
 
@@ -140,9 +172,9 @@ Technology:
 
 Requirements:
 
-☐ Responsive UI  
-☐ Clean dashboard design  
-☐ Interactive charts  
+☑ Responsive UI  
+☑ Clean dashboard design  
+☑ Interactive charts  
 
 ---
 
@@ -155,9 +187,9 @@ Technology:
 
 Requirements:
 
-☐ API endpoints created  
-☐ Data processing implemented  
-☐ Frontend connection working  
+☑ API endpoints created  
+☑ Data processing implemented  
+☑ Frontend connection working  
 
 ---
 
@@ -169,10 +201,10 @@ Technology:
 
 Tables:
 
-☐ Missions  
-☐ Telemetry Records  
-☐ Anomalies  
-☐ AI Reports  
+☑ Missions  
+☑ Telemetry Records  
+☑ Anomalies  
+☑ AI Reports  
 
 ---
 
@@ -180,14 +212,14 @@ Tables:
 
 Technology:
 
-- IBM Granite
+- IBM Granite (ibm/granite-4-h-small via IBM watsonx)
 - IBM Bob
 
 Requirements:
 
-☐ AI explanations generated  
-☐ AI reports created  
-☐ AI assistant functional  
+☑ AI explanations generated  
+☑ AI reports created  
+☑ AI assistant functional  
 
 ---
 
@@ -195,25 +227,25 @@ Requirements:
 
 ## Phase 1: Foundation
 
-☐ Create application structure  
-☐ Configure database  
-☐ Create initial APIs  
+☑ Create application structure  
+☑ Configure database  
+☑ Create initial APIs  
 
 ---
 
 ## Phase 2: Dashboard
 
-☐ Build UI components  
-☐ Connect telemetry data  
-☐ Add charts  
+☑ Build UI components  
+☑ Connect telemetry data  
+☑ Add charts  
 
 ---
 
 ## Phase 3: AI Features
 
-☐ Add anomaly detection  
-☐ Add IBM Granite integration  
-☐ Build Mission Commander  
+☑ Add anomaly detection  
+☑ Add IBM Granite integration  
+☑ Build Mission Commander  
 
 ---
 
@@ -244,9 +276,9 @@ These may be considered after the competition.
 
 MissionInsights AI is complete when:
 
-☐ Users can view spacecraft telemetry  
-☐ AI detects spacecraft anomalies  
-☐ AI explains mission risks  
-☐ AI generates mission reports  
+☑ Users can view spacecraft telemetry  
+☑ AI detects spacecraft anomalies  
+☑ AI explains mission risks  
+☑ AI generates mission reports  
 ☐ Application is deployed publicly  
 ☐ GitHub repository is ready for submission
