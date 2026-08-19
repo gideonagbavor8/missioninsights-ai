@@ -4,6 +4,16 @@ import { useState } from "react";
 import { analyzeTelemetry } from "@/lib/api";
 import type { AIAnalysis } from "@/lib/types";
 
+const RISK_BADGE_STYLES: Record<string, string> = {
+  low:      "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400",
+  medium:   "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300",
+  high:     "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400",
+};
+
+function getRiskBadgeClass(riskLevel: string): string {
+  return RISK_BADGE_STYLES[riskLevel.toLowerCase()] ?? RISK_BADGE_STYLES.low;
+}
+
 interface Props {
   missionId: number;
 }
@@ -78,7 +88,7 @@ export default function AIAnalysisPanel({ missionId }: Props) {
               Risk Level
             </p>
 
-            <span className="mt-2 inline-block rounded-full bg-green-100 px-3 py-1 text-sm font-semibold text-green-700 dark:bg-green-900/40 dark:text-green-400">
+            <span className={`mt-2 inline-block rounded-full px-3 py-1 text-sm font-semibold capitalize ${getRiskBadgeClass(analysis.risk_level)}`}>
               {analysis.risk_level}
             </span>
           </div>
