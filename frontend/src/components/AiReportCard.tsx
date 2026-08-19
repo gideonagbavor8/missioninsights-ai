@@ -1,70 +1,81 @@
 import type { AIReport } from "@/lib/types";
+import { severityTone, solidVar } from "@/lib/tone";
+import StatusChip from "./ui/StatusChip";
 
-const RISK: Record<string, { stripe: string; text: string; bg: string }> = {
-  critical: { stripe: "#ef4444", text: "#f87171", bg: "rgba(239,68,68,0.12)"  },
-  high:     { stripe: "#f97316", text: "#fb923c", bg: "rgba(249,115,22,0.12)" },
-  medium:   { stripe: "#f59e0b", text: "#fbbf24", bg: "rgba(245,158,11,0.12)" },
-  low:      { stripe: "#22c55e", text: "#4ade80", bg: "rgba(34,197,94,0.12)"  },
-};
+interface Props {
+  report: AIReport;
+  /** The newest report opens by default; the rest start collapsed. */
+  defaultOpen?: boolean;
+}
 
-function getRisk(r: string) { return RISK[r.toLowerCase()] ?? RISK.low; }
+/**
+ * A report as a collapsed disclosure row.
+ *
+ * Previously each report rendered its full summary and recommendation, so the
+ * section grew without bound — twenty reports meant a wall of prose. Collapsed
+ * rows keep every report reachable at a fixed cost per item, and <details>
+ * means expanding needs no client JS.
+ */
+export default function AiReportCard({ report, defaultOpen = false }: Props) {
+  // `low` risk is a good outcome on a report, unlike a `low` severity anomaly.
+  const tone = report.risk_level.toLowerCase() === "low" ? "ok" : severityTone(report.risk_level);
 
-interface Props { report: AIReport; }
-
-export default function AiReportCard({ report }: Props) {
-  const risk = getRisk(report.risk_level);
   const createdAt = report.created_at
     ? new Date(report.created_at).toLocaleString([], {
-        month: "short", day: "numeric",
-        hour: "2-digit", minute: "2-digit",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
       })
     : null;
 
   return (
-    <div
-      className="flex overflow-hidden rounded-xl"
-      style={{
-        background: "var(--bg-card)",
-        border: "1px solid var(--border)",
-        boxShadow: "0 1px 3px rgba(0,0,0,0.12)",
-      }}
+    <details
+      className="disclosure card card-flat card-interactive overflow-hidden"
+      style={{ borderLeft: `3px solid ${solidVar(tone)}` }}
+      open={defaultOpen}
     >
-      {/* Left risk stripe */}
-      <div className="w-1 shrink-0" style={{ background: risk.stripe }} />
-
-      <div className="flex-1 px-4 py-3.5">
-        {/* Header row */}
-        <div className="flex items-start justify-between gap-2">
-          <p className="section-label">AI Report #{report.id}</p>
-          <div className="flex items-center gap-2">
-            <span
-              className="rounded-full px-2 py-0.5 text-[10px] font-bold capitalize"
-              style={{ background: risk.bg, color: risk.text }}
-            >
-              {report.risk_level} risk
-            </span>
+      <summary className="flex items-start gap-3 px-4 py-3">
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <StatusChip tone={tone}>{report.risk_level} risk</StatusChip>
+            <span className="t-meta t-num">Report #{report.id}</span>
             {createdAt && (
-              <span className="text-[10px] tabular-nums" style={{ color: "var(--text-muted)" }}>
-                {createdAt}
-              </span>
+              <>
+                <span className="t-meta" aria-hidden="true">·</span>
+                <span className="t-meta t-num">{createdAt}</span>
+              </>
             )}
           </div>
+
+          {/* Teaser, hidden once expanded so the summary is never duplicated */}
+          <p className="disclosure-teaser t-body-muted mt-1.5 line-clamp-1">
+            {report.summary}
+          </p>
         </div>
 
-        {/* Summary */}
-        <p className="mt-2 text-xs leading-relaxed" style={{ color: "var(--text-primary)" }}>
-          {report.summary}
-        </p>
+        <span
+          className="disclosure-chevron mt-1 shrink-0"
+          style={{ color: "var(--text-muted)" }}
+          aria-hidden="true"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
+            <path fillRule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
+          </svg>
+        </span>
+      </summary>
 
-        {/* Recommendation */}
+      <div className="px-4 pb-4">
+        <p className="t-body">{report.summary}</p>
+
         <div
-          className="mt-2.5 rounded-lg px-3 py-2"
+          className="mt-3 rounded-lg px-3.5 py-3"
           style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)" }}
         >
-          <p className="section-label mb-1">Recommendation</p>
-          <p className="text-xs" style={{ color: "var(--text-primary)" }}>{report.recommendation}</p>
+          <p className="section-label mb-1.5">Recommendation</p>
+          <p className="t-body">{report.recommendation}</p>
         </div>
       </div>
-    </div>
+    </details>
   );
 }
