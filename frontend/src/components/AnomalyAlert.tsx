@@ -1,73 +1,72 @@
 import type { Anomaly } from "@/lib/types";
 
-const SEVERITY_STYLES: Record<string, { bar: string; badge: string; row: string }> = {
-  critical: {
-    bar:   "bg-red-500",
-    badge: "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400",
-    row:   "border-red-300 bg-red-50 dark:border-red-700 dark:bg-red-950/30",
-  },
-  high: {
-    bar:   "bg-orange-500",
-    badge: "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-400",
-    row:   "border-orange-300 bg-orange-50 dark:border-orange-700 dark:bg-orange-950/30",
-  },
-  medium: {
-    bar:   "bg-yellow-400",
-    badge: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300",
-    row:   "border-yellow-300 bg-yellow-50 dark:border-yellow-700 dark:bg-yellow-950/30",
-  },
-  low: {
-    bar:   "bg-blue-400",
-    badge: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400",
-    row:   "border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900",
-  },
+const SEV: Record<string, { stripe: string; badge: string; badgeText: string }> = {
+  critical: { stripe: "#ef4444", badge: "rgba(239,68,68,0.12)",   badgeText: "#f87171" },
+  high:     { stripe: "#f97316", badge: "rgba(249,115,22,0.12)",  badgeText: "#fb923c" },
+  medium:   { stripe: "#f59e0b", badge: "rgba(245,158,11,0.12)",  badgeText: "#fbbf24" },
+  low:      { stripe: "#3b82f6", badge: "rgba(59,130,246,0.12)",  badgeText: "#60a5fa" },
 };
 
-function getStyle(severity: string) {
-  return SEVERITY_STYLES[severity.toLowerCase()] ?? SEVERITY_STYLES.low;
-}
+function getSev(s: string) { return SEV[s.toLowerCase()] ?? SEV.low; }
 
-interface Props {
-  anomaly: Anomaly;
-}
+interface Props { anomaly: Anomaly; }
 
 export default function AnomalyAlert({ anomaly }: Props) {
-  const style = getStyle(anomaly.severity);
+  const sev = getSev(anomaly.severity);
   const detectedAt = anomaly.detected_at
-    ? new Date(anomaly.detected_at).toLocaleString()
+    ? new Date(anomaly.detected_at).toLocaleString([], {
+        month: "short", day: "numeric",
+        hour: "2-digit", minute: "2-digit",
+      })
     : null;
 
   return (
-    <div className={`rounded-xl border p-4 shadow-sm ${style.row}`}>
-      <div className="flex flex-wrap items-start justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <span className={`h-2 w-2 shrink-0 rounded-full ${style.bar}`} />
-          <span className="font-semibold text-zinc-900 dark:text-zinc-100">
-            {anomaly.issue}
-          </span>
-        </div>
+    <div
+      className="flex overflow-hidden rounded-xl"
+      style={{
+        background: "var(--bg-card)",
+        border: "1px solid var(--border)",
+      }}
+    >
+      {/* Left severity stripe */}
+      <div className="w-1 shrink-0" style={{ background: sev.stripe }} />
+
+      <div className="flex-1 min-w-0 px-3 py-2.5">
+        {/* Row 1: badge · title · confidence */}
         <div className="flex items-center gap-2">
           <span
-            className={`rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize ${style.badge}`}
+            className="shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide"
+            style={{ background: sev.badge, color: sev.badgeText }}
           >
             {anomaly.severity}
           </span>
-          <span className="text-xs text-zinc-400 dark:text-zinc-500">
-            {anomaly.confidence.toFixed(0)}% confidence
+          <span
+            className="flex-1 min-w-0 text-sm font-semibold leading-snug"
+            style={{ color: "var(--text-primary)" }}
+          >
+            {anomaly.issue}
+          </span>
+          <span
+            className="shrink-0 text-xs font-bold tabular-nums ml-2"
+            style={{ color: sev.badgeText }}
+          >
+            {anomaly.confidence.toFixed(0)}%
           </span>
         </div>
+
+        {/* Row 2: action · timestamp */}
+        <div className="mt-0.5 flex items-baseline justify-between gap-3">
+          <p className="text-xs leading-snug" style={{ color: "var(--text-secondary)" }}>
+            <span className="font-medium" style={{ color: "var(--text-primary)" }}>Action: </span>
+            {anomaly.recommended_action}
+          </p>
+          {detectedAt && (
+            <span className="shrink-0 text-[10px] tabular-nums whitespace-nowrap" style={{ color: "var(--text-muted)" }}>
+              {detectedAt}
+            </span>
+          )}
+        </div>
       </div>
-      <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-        <span className="font-medium text-zinc-700 dark:text-zinc-300">
-          Recommended action:{" "}
-        </span>
-        {anomaly.recommended_action}
-      </p>
-      {detectedAt && (
-        <p className="mt-1.5 text-xs text-zinc-400 dark:text-zinc-500">
-          Detected: {detectedAt}
-        </p>
-      )}
     </div>
   );
 }
