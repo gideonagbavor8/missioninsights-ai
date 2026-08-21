@@ -1,4 +1,7 @@
+import re
+
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 
@@ -18,6 +21,21 @@ router = APIRouter(
 
 class AnalyzeRequest(BaseModel):
     mission_id: int
+
+
+# Namespace for the per-mission advisory lock taken around analyze requests.
+# Arbitrary constant; only needs to be stable and not collide with other locks.
+_ANALYZE_LOCK_NAMESPACE = 4242
+
+_NUMBERED_ITEM = re.compile(r"\s*\d+\.\s+")
+
+
+def _split_recommendations(recommendation: str) -> list[str]:
+    """Invert the ``"1. a 2. b"`` join used when a report is persisted."""
+    if not recommendation or recommendation.strip() == "No recommendations.":
+        return []
+    parts = [p.strip() for p in _NUMBERED_ITEM.split(recommendation) if p.strip()]
+    return parts or [recommendation.strip()]
 
 
 @router.post("/analyze")
@@ -61,14 +79,58 @@ Thruster Vibration: {telemetry.thruster_vibration}g
 
     anomaly_text = "\n".join(
         f"- {a.issue} | Severity: {a.severity} | "
-        f"Confidence: {a.confidence * 100:.0f}% "
-        f"(stored value: {a.confidence}) | "
+        f"Confidence: {a.confidence:.0f}% | "
         f"Action: {a.recommended_action}"
         for a in anomalies
     )
 
     if not anomaly_text:
         anomaly_text = "No detected anomalies."
+
+    # ── Deduplication ────────────────────────────────────────────────────────
+    # A report is a function of (mission, latest telemetry, anomaly state).
+    # All three tables stamp their timestamps with datetime.now(timezone.utc),
+    # so a report created at or after the newest input timestamp necessarily
+    # describes the current state. That gives a deterministic identity without
+    # adding a column or a migration.
+    state_at = telemetry.recorded_at
+    if anomalies:
+        # `anomalies` is ordered by detected_at desc, and the detector refreshes
+        # detected_at when it updates an existing row, so [0] is the newest edit.
+        state_at = max(state_at, anomalies[0].detected_at)
+
+    # Serialise concurrent analyses of the same mission so the check-then-insert
+    # below is atomic. Released automatically when this transaction ends.
+    db.execute(
+        text("SELECT pg_advisory_xact_lock(:ns, :mission_id)"),
+        {"ns": _ANALYZE_LOCK_NAMESPACE, "mission_id": data.mission_id},
+    )
+
+    existing_report = (
+        db.query(AIReport)
+        .filter(
+            AIReport.mission_id == data.mission_id,
+            AIReport.created_at >= state_at,
+        )
+        .order_by(AIReport.created_at.desc())
+        .first()
+    )
+
+    if existing_report is not None:
+        # Nothing has changed since this report was written — reuse it rather
+        # than paying for another Granite call and storing a near-identical row.
+        db.commit()  # ends the transaction, releasing the advisory lock
+        return {
+            "mission": mission.mission_name,
+            "spacecraft_id": mission.spacecraft_name,
+            "reused": True,
+            "ai_report": {
+                "health_summary": existing_report.summary,
+                "anomalies": [a.issue for a in anomalies],
+                "risk_level": existing_report.risk_level,
+                "recommendations": _split_recommendations(existing_report.recommendation),
+            },
+        }
 
     report = generate_mission_report(
         telemetry_data=telemetry_text,
@@ -97,6 +159,7 @@ Thruster Vibration: {telemetry.thruster_vibration}g
     return {
         "mission": mission.mission_name,
         "spacecraft_id": mission.spacecraft_name,
+        "reused": False,
         "ai_report": report,
     }
 
