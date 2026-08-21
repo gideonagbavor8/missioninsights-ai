@@ -74,14 +74,14 @@ try:
                 mission_id=mission.id,
                 issue="Thruster vibration trend increasing",
                 severity="Medium",
-                confidence=0.87,
+                confidence=87.0,
                 recommended_action="Inspect propulsion subsystem",
             ),
             Anomaly(
                 mission_id=mission.id,
                 issue="Fuel consumption above expected baseline",
                 severity="Medium",
-                confidence=0.82,
+                confidence=82.0,
                 recommended_action="Review burn efficiency",
             ),
         ]

@@ -32,6 +32,7 @@ export default function AnomalyAlert({ anomaly }: Props) {
             style={{ color: fgVar(tone) }}
             title="Detection confidence"
           >
+            {/* Backend stores confidence on a 0–100 scale — render it as-is. */}
             {anomaly.confidence.toFixed(0)}% confidence
           </span>
         </div>

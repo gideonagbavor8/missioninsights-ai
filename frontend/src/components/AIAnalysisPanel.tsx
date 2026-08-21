@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { analyzeTelemetry } from "@/lib/api";
 import type { AIAnalysis } from "@/lib/types";
 import { severityTone, solidVar } from "@/lib/tone";
@@ -19,7 +19,14 @@ export default function AIAnalysisPanel({ missionId }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // `disabled={loading}` only takes effect after a re-render, so two fast
+  // clicks can both enter the handler. This ref closes that window.
+  const inFlight = useRef(false);
+
   async function handleAnalyze() {
+    if (inFlight.current) return;
+    inFlight.current = true;
+
     setLoading(true);
     setError(null);
     try {
@@ -27,6 +34,7 @@ export default function AIAnalysisPanel({ missionId }: Props) {
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to generate AI analysis.");
     } finally {
+      inFlight.current = false;
       setLoading(false);
     }
   }
