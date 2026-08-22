@@ -114,9 +114,6 @@ def answer_mission_question(
                 "When comparing confidence values, compare the numeric percentages correctly. "
                 "For example, 87% is greater than 82%. "
 
-                "When comparing confidence values, compare the numeric values correctly. "
-                "For example, 0.87 is greater than 0.82. "
-
                 "When determining which anomaly should receive priority, consider "
                 "severity, confidence, potential mission impact, and whether the "
                 "anomaly indicates a worsening trend. "
