@@ -91,7 +91,6 @@ Detected Anomalies:
             "recommendations": [],
         }
 
-
 def answer_mission_question(
     telemetry_data: str,
     anomaly_data: str,
@@ -106,21 +105,26 @@ def answer_mission_question(
                 "readings and detected anomalies provided. "
 
                 "IMPORTANT DATA INTERPRETATION RULES: "
-                "Anomaly confidence values are percentages from 0 to 100. "
-                "For example, 87% means 87% confidence and 82% means 82% confidence. "
-                "Always report the confidence exactly as provided. "
-                "Never divide or multiply confidence values by 100. "
-
-                "When comparing confidence values, compare the numeric percentages correctly. "
-                "For example, 87% is greater than 82%. "
+                "Anomaly confidence values are whole-number percentages from 0 to 100. "
+                "A confidence value of 87 means 87 percent confidence. "
+                "A confidence value of 82 means 82 percent confidence. "
+                "Treat confidence values exactly as provided in the anomaly data. "
+                "Never convert confidence values to decimal fractions. "
+                "Never divide confidence values by 100. "
+                "Never multiply confidence values by 100. "
+                "Never report 87 as 0.87 percent or 1 percent. "
+                "If the data says 87 percent confidence, report 87 percent confidence. "
+                "If the data says 82 percent confidence, report 82 percent confidence. "
 
                 "When determining which anomaly should receive priority, consider "
                 "severity, confidence, potential mission impact, and whether the "
                 "anomaly indicates a worsening trend. "
+
                 "A worsening thruster vibration trend should be treated as an important "
                 "propulsion risk because propulsion is mission-critical. "
 
-                "Never invent telemetry values, anomaly events, or system states. "
+                "Never invent telemetry values, anomaly events, confidence values, "
+                "or system states. "
                 "When proposing a cause, clearly label it as a possibility, not a fact. "
                 "If the supplied data does not establish a definite relationship, say so. "
 
