@@ -69,15 +69,15 @@ def analyze_mission(
     )
 
     telemetry_text = f"""
-Mission: {mission.mission_name}
-Spacecraft ID: {mission.spacecraft_name}
+        Mission: {mission.mission_name}
+        Spacecraft ID: {mission.spacecraft_name}
 
-Battery: {telemetry.battery_level}%
-Fuel: {telemetry.fuel_level}%
-Temperature: {telemetry.temperature}°C
-Signal Strength: {telemetry.signal_strength}%
-Thruster Vibration: {telemetry.thruster_vibration}g
-"""
+        Battery: {telemetry.battery_level}%
+        Fuel: {telemetry.fuel_level}%
+        Temperature: {telemetry.temperature}°C
+        Signal Strength: {telemetry.signal_strength}%
+        Thruster Vibration: {telemetry.thruster_vibration}g
+        """
 
     anomaly_text = "\n".join(
         f"- {a.issue} | Severity: {a.severity} | "
@@ -219,7 +219,7 @@ def ask_mission(
 
     anomaly_text = "\n".join(
         f"- {a.issue} | Severity: {a.severity} | "
-        f"Confidence: {a.confidence:.0f}% | "
+        f"Confidence: {a.confidence * 100:.0f}% | "
         f"Action: {a.recommended_action}"
         for a in anomalies
     ) or "No detected anomalies."
