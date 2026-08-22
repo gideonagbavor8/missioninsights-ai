@@ -3,6 +3,8 @@ import re
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import text
 from sqlalchemy.orm import Session
+from typing import cast
+from datetime import datetime
 from pydantic import BaseModel
 
 from app.database import get_db
@@ -93,11 +95,14 @@ Thruster Vibration: {telemetry.thruster_vibration}g
     # so a report created at or after the newest input timestamp necessarily
     # describes the current state. That gives a deterministic identity without
     # adding a column or a migration.
-    state_at = telemetry.recorded_at
-    if anomalies:
+    state_at = cast(datetime, telemetry.recorded_at)
+    if len(anomalies) > 0:
         # `anomalies` is ordered by detected_at desc, and the detector refreshes
         # detected_at when it updates an existing row, so [0] is the newest edit.
-        state_at = max(state_at, anomalies[0].detected_at)
+        state_at = max(
+            state_at,
+            cast(datetime, anomalies[0].detected_at),
+        )
 
     # Serialise concurrent analyses of the same mission so the check-then-insert
     # below is atomic. Released automatically when this transaction ends.
@@ -128,7 +133,9 @@ Thruster Vibration: {telemetry.thruster_vibration}g
                 "health_summary": existing_report.summary,
                 "anomalies": [a.issue for a in anomalies],
                 "risk_level": existing_report.risk_level,
-                "recommendations": _split_recommendations(existing_report.recommendation),
+                "recommendations": _split_recommendations(
+                    cast(str, existing_report.recommendation),
+                ),
             },
         }
 
