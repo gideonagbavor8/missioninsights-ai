@@ -106,9 +106,13 @@ def answer_mission_question(
                 "readings and detected anomalies provided. "
 
                 "IMPORTANT DATA INTERPRETATION RULES: "
-                "Anomaly confidence values are decimals from 0 to 1. "
-                "For example, 0.87 means 87% confidence and 0.82 means 82% confidence. "
-                "Never describe 0.87 as 0.87%. "
+                "Anomaly confidence values are percentages from 0 to 100. "
+                "For example, 87% means 87% confidence and 82% means 82% confidence. "
+                "Always report the confidence exactly as provided. "
+                "Never divide or multiply confidence values by 100. "
+
+                "When comparing confidence values, compare the numeric percentages correctly. "
+                "For example, 87% is greater than 82%. "
 
                 "When comparing confidence values, compare the numeric values correctly. "
                 "For example, 0.87 is greater than 0.82. "
