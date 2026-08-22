@@ -340,6 +340,162 @@ html:not(.dark) .dash-bg::before {
   border-radius: 4px;
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   LANDING PAGE
+   Only additive — nothing here is used by the dashboard.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* Deep-space backdrop: a faint technical grid over the atmospheric wash. */
+.space-bg {
+  position: relative;
+  isolation: isolate;
+}
+
+.space-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, var(--border) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--border) 1px, transparent 1px);
+  background-size: 64px 64px;
+  /* Fades the grid out at the edges so it never reads as a hard table */
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 20%, transparent 78%);
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 20%, transparent 78%);
+}
+
+.space-glow {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 60vw 45vh at 50% -5%, var(--accent-bg) 0%, transparent 70%),
+    radial-gradient(ellipse 40vw 30vh at 85% 20%, rgba(34, 211, 238, 0.06) 0%, transparent 70%);
+}
+
+/* ── Buttons ─────────────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 10px;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  border: 1px solid transparent;
+  transition: background-color 150ms ease, border-color 150ms ease,
+    color 150ms ease, transform 150ms ease;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: var(--accent-dim);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: var(--surface-subtle);
+  border-color: var(--border-strong);
+  color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+  background: var(--surface-hover);
+  transform: translateY(-1px);
+}
+
+.btn-sm {
+  padding: 0.5rem 0.875rem;
+  font-size: 0.8125rem;
+  border-radius: 8px;
+}
+
+/* ── Scroll reveal ───────────────────────────────────────────────────────── */
+/* Declared only when motion is welcome: under reduced-motion the rule never
+   applies, so content is visible from the start rather than stuck at opacity 0
+   waiting for a transition that will never run. */
+@media (prefers-reduced-motion: no-preference) {
+  .reveal {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 600ms ease-out, transform 600ms ease-out;
+  }
+
+  .reveal[data-visible="true"] {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ── Hero visual motion ──────────────────────────────────────────────────── */
+@keyframes orbit-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Opacity/transform only — the SVG `r` geometry property is not CSS-animatable
+   in Safari, so a halo ring is scaled instead of growing the node itself. */
+@keyframes signal-pulse {
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50%      { opacity: 0.12; transform: scale(2.1); }
+}
+
+@keyframes trace-draw {
+  from { stroke-dashoffset: 300; }
+  to   { stroke-dashoffset: 0; }
+}
+
+.orbit-rotate {
+  transform-origin: 200px 200px;
+  animation: orbit-spin 34s linear infinite;
+}
+
+.orbit-rotate-slow {
+  transform-origin: 200px 200px;
+  animation: orbit-spin 58s linear infinite reverse;
+}
+
+.node-pulse { animation: signal-pulse 3.4s ease-in-out infinite; }
+
+.trace-line {
+  stroke-dasharray: 300;
+  animation: trace-draw 3.2s ease-out forwards;
+}
+
+/* ── Flow connector (Telemetry -> Action) ────────────────────────────────── */
+.flow-step:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  background: linear-gradient(to bottom, var(--border-strong), transparent);
+  left: 50%;
+  bottom: -1.5rem;
+  width: 1px;
+  height: 1.5rem;
+  transform: translateX(-50%);
+}
+
+@media (min-width: 1024px) {
+  .flow-step:not(:last-child)::after {
+    left: auto;
+    right: -1.5rem;
+    top: 50%;
+    bottom: auto;
+    width: 1.5rem;
+    height: 1px;
+    transform: translateY(-50%);
+    background: linear-gradient(to right, var(--border-strong), transparent);
+  }
+}
+
 /* ── Respect reduced-motion ──────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
