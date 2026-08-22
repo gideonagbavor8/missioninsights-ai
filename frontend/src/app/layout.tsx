@@ -13,8 +13,26 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MissionInsights AI",
-  description: "AI-powered space mission intelligence dashboard",
+  // Child routes set only their own segment; "— MissionInsights AI" is appended.
+  title: {
+    default: "MissionInsights AI",
+    template: "%s — MissionInsights AI",
+  },
+  description:
+    "AI-powered space mission intelligence: live telemetry, anomaly detection, mission health scoring and IBM watsonx Granite analysis.",
+  applicationName: "MissionInsights AI",
+  openGraph: {
+    title: "MissionInsights AI",
+    description:
+      "AI-powered space mission intelligence: live telemetry, anomaly detection, mission health scoring and IBM watsonx Granite analysis.",
+    siteName: "MissionInsights AI",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "MissionInsights AI",
+    description: "AI-powered space mission intelligence.",
+  },
 };
 
 /**
