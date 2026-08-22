@@ -212,8 +212,7 @@ def ask_mission(
 
     anomaly_text = "\n".join(
         f"- {a.issue} | Severity: {a.severity} | "
-        f"Confidence: {a.confidence * 100:.0f}% "
-        f"(stored value: {a.confidence}) | "
+        f"Confidence: {a.confidence:.0f}% | "
         f"Action: {a.recommended_action}"
         for a in anomalies
     ) or "No detected anomalies."
