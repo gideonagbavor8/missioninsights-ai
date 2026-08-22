@@ -33,6 +33,9 @@
   --accent-bg:   rgba(99, 102, 241, 0.12);
   --accent-line: rgba(99, 102, 241, 0.35);
 
+  /* Brand — the telemetry "signal" node in the logo mark */
+  --brand-signal: #22d3ee;
+
   /* Status — `fg` reads on `bg`, `solid` is for stripes/dots/bars */
   --ok-fg:     #4ade80;  --ok-bg:     rgba( 34, 197,  94, 0.14);  --ok-line:     rgba( 34, 197,  94, 0.32);  --ok-solid:     #22c55e;
   --warn-fg:   #fbbf24;  --warn-bg:   rgba(245, 158,  11, 0.14);  --warn-line:   rgba(245, 158,  11, 0.32);  --warn-solid:   #f59e0b;
@@ -77,6 +80,9 @@ html:not(.dark) {
   --accent-text: #4338ca;
   --accent-bg:   rgba(79, 70, 229, 0.08);
   --accent-line: rgba(79, 70, 229, 0.28);
+
+  /* Deepened so the signal node keeps contrast on white */
+  --brand-signal: #0e7490;
 
   --ok-fg:     #15803d;  --ok-bg:     rgba( 34, 197,  94, 0.11);  --ok-line:     rgba( 21, 128,  61, 0.28);
   --warn-fg:   #b45309;  --warn-bg:   rgba(245, 158,  11, 0.13);  --warn-line:   rgba(180,  83,   9, 0.28);

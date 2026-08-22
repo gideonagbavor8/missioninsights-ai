@@ -31,7 +31,7 @@ import {
   ReportsSkeleton,
 } from "@/components/ui/Skeletons";
 
-export const metadata = { title: "Dashboard — MissionInsights AI" };
+export const metadata = { title: "Dashboard" };
 
 // ── Telemetry helpers ────────────────────────────────────────────────────────
 
