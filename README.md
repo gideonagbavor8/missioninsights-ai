@@ -15,7 +15,7 @@ mission health scoring, anomaly detection, and IBM Granite-powered analysis.
 
 🚀 **[Live Demo](https://missioninsights-ai.vercel.app/)** &nbsp;·&nbsp;
 📦 **[GitHub](https://github.com/gideonagbavor8/missioninsights-ai)** &nbsp;·&nbsp;
-🎥 **Demo Video:** _Add before submission_
+🎥 **[Demo Video](https://www.loom.com/share/cea464f7350b469f857e98f6aadb54c9)** &nbsp;·&nbsp;
 
 </div>
 
