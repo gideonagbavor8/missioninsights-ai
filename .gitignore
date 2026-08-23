@@ -5,10 +5,6 @@ venv/
 __pycache__/
 
 # Environment variables
-.env
-.env.local
-.env.development
-.env.production
 
 # Next.js
 .next/
@@ -24,7 +20,6 @@ out/
 *.db
 
 # IDE
-.vscode/
 .idea/
 
 # Operating system
@@ -40,3 +35,7 @@ build/
 
 # Testing
 coverage/
+branch_structure.json
+temp_auto_push.bat
+temp_interactive_push.bat
+config.bat
